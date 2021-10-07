@@ -44,14 +44,15 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	msgWithoutNewLine := strings.Replace(msg, "\n", "", -1)
-	handleMessage(msgWithoutNewLine)
+	handleMessage(msg)
 }
 
 // parses the message to extract its key and value
-// message will be something like key=swee;value=1234
+// message will be something like key=swee;value=1234\n
 func handleMessage(msg string) {
-	splited := strings.Split(msg, ";")
+	msgWithoutNewLine := strings.Replace(msg, "\n", "", -1)
+
+	splited := strings.Split(msgWithoutNewLine, ";")
 	keySplit := strings.Split(splited[0], "=")
 	key := keySplit[1]
 	valueSplit := strings.Split(splited[1], "=")

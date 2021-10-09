@@ -97,6 +97,34 @@ func TestGetOpFromMessageError2(t *testing.T) {
 	assertEqual(t, OperationNotSupported, err.Error())
 }
 
+func TestStorageStore(t *testing.T) {
+	storage := NewStorage()
+	key := "name"
+	value := "Danilo"
+	storage.Store(key, value)
+
+	assertEqual(t, storage.db[key], value)
+}
+
+func TestStorageRead(t *testing.T) {
+	storage := NewStorage()
+	key := "name"
+	value := "Danilo"
+	storage.Store(key, value)
+
+	assertEqual(t, storage.Read(key), value)
+}
+
+func TestStorageDelete(t *testing.T) {
+	storage := NewStorage()
+	key := "name"
+	value := "Danilo"
+	storage.Store(key, value)
+	storage.Delete(key)
+
+	assertEqual(t, storage.Read(key), nil)
+}
+
 func assertEqual(t *testing.T, expected, actual interface{}) {
 	if expected != actual {
 		t.Fatalf("\nAssert equals error\n\tExpected %v\n\tActual %v\n", expected, actual)

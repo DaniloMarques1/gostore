@@ -38,6 +38,13 @@ type Storage struct {
 	db map[string]string
 }
 
+func NewStorage() *Storage {
+	db := make(map[string]string)
+	return &Storage{
+		db: db,
+	}
+}
+
 func (s *Storage) Store(key string, value string) {
 	s.db[key] = value
 }
@@ -48,13 +55,6 @@ func (s *Storage) Read(key string) string {
 
 func (s *Storage) Delete(key string) {
 	delete(s.db, key)
-}
-
-func NewStorage() *Storage {
-	db := make(map[string]string)
-	return &Storage{
-		db: db,
-	}
 }
 
 type Message struct {

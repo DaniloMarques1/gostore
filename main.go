@@ -122,6 +122,7 @@ func handleConnection(conn net.Conn) {
 // parses the message to extract its key and value
 // message will be something like op=store;key=swee;value=1234\n
 func parseMessage(msg string) (*Message, error) {
+	log.Printf("IN parseMessage %+v\n", msg)
 	msg = strings.Replace(msg, "\n", "", -1)
 	splited := strings.Split(msg, ";")
 
@@ -135,7 +136,7 @@ func parseMessage(msg string) (*Message, error) {
 		log.Printf("Invalid syntax on operation\n")
 		return nil, errors.New(InvalidSyntax)
 	}
-	if opSplit[0] != "op" {
+	if opSplit[0] != "op" || len(opSplit[1]) == 0 {
 		log.Printf("Invalid syntax on operation key\n")
 		return nil, errors.New(InvalidMessageKey)
 	}
@@ -147,7 +148,7 @@ func parseMessage(msg string) (*Message, error) {
 		log.Printf("Invalid syntax on key\n")
 		return nil, errors.New(InvalidSyntax)
 	}
-	if keySplit[0] != "key" {
+	if keySplit[0] != "key" || len(keySplit[1]) == 0 {
 		log.Printf("Invalid syntax on key key\n")
 		return nil, errors.New(InvalidMessageKey)
 	}
@@ -165,7 +166,7 @@ func parseMessage(msg string) (*Message, error) {
 			log.Printf("Invalid syntax on value.\n")
 			return nil, errors.New(InvalidSyntax)
 		}
-		if valueSplit[0] != "value" {
+		if valueSplit[0] != "value" || len(valueSplit[1]) == 0 {
 			log.Printf("Invalid syntax on key value.\n")
 			return nil, errors.New(InvalidSyntax)
 		}
@@ -182,6 +183,7 @@ func parseMessage(msg string) (*Message, error) {
 // return the Operation that will be executed
 // based on the received message
 func getOperationFromMessage(message *Message) (Operation, error) {
+	log.Printf("IN getOperationFromMessage %+v\n", message)
 	var operation Operation
 	if message.op == OP_STORE {
 		operation = StoreOperation{

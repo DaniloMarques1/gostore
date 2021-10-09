@@ -55,6 +55,13 @@ func TestParseMessageError6(t *testing.T) {
 	assertEqual(t, InvalidMessageKey, err.Error())
 }
 
+func TestParseMessageError7(t *testing.T) {
+	msg := "op=;key=;value="
+	_, err := parseMessage(msg)
+	assertNotNil(t, err)
+	assertEqual(t, InvalidMessageKey, err.Error())
+}
+
 func TestGetOpFromMessage(t *testing.T) {
 	msg := Message{
 		op:    OP_STORE,

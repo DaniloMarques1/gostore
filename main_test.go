@@ -101,7 +101,19 @@ func TestStorageStore(t *testing.T) {
 	storage := NewStorage()
 	key := "name"
 	value := "Danilo"
-	storage.Store(key, value)
+	err := storage.Store(key, value)
+	assertNil(t, err)
+
+	assertEqual(t, storage.db[key], value)
+}
+func TestStorageStore1(t *testing.T) {
+	storage := NewStorage()
+	key := "name"
+	value := "Danilo"
+	err := storage.Store(key, value)
+	assertNil(t, err)
+	err = storage.Store(key, "Another value")
+	assertNotNil(t, err)
 
 	assertEqual(t, storage.db[key], value)
 }
@@ -122,7 +134,7 @@ func TestStorageDelete(t *testing.T) {
 	storage.Store(key, value)
 	storage.Delete(key)
 
-	assertEqual(t, storage.Read(key), nil)
+	assertEqual(t, "", storage.Read(key))
 }
 
 func assertEqual(t *testing.T, expected, actual interface{}) {

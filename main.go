@@ -24,12 +24,14 @@ const (
 const (
 	InvalidSyntax = "Message is not valid. Invalid syntax"
 	// TODO better error report, it is not the key of the value it's the op, key, value
-	InvalidMessageKey     = "The key given is not valid"
+	InvalidMessageKey     = "The given key is not valid"
 	OperationNotSupported = "Operation is not supported"
+	KeyNotFound           = "The given key was not found"
+	DuplicationOfKey      = "The given key is already registered"
 )
 
 type StorageInterface interface {
-	Store(key string, value string)
+	Store(key string, value string) error
 	Read(key string) string
 	Delete(key string)
 }
@@ -38,6 +40,7 @@ type Storage struct {
 	db map[string]string
 }
 
+// returns a pointer to a new storage
 func NewStorage() *Storage {
 	db := make(map[string]string)
 	return &Storage{
@@ -45,14 +48,23 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) Store(key string, value string) {
+// stores a value with the specified key inside the in memory db
+func (s *Storage) Store(key string, value string) error {
+	_, exists := s.db[key]
+	if exists {
+		return errors.New(DuplicationOfKey)
+	}
 	s.db[key] = value
+
+	return nil
 }
 
+// retrives a stored value
 func (s *Storage) Read(key string) string {
 	return s.db[key]
 }
 
+// delete a stored value
 func (s *Storage) Delete(key string) {
 	delete(s.db, key)
 }
@@ -103,7 +115,11 @@ func (dop DeleteOperation) executeOperation(_ net.Conn, storage StorageInterface
 func (rop ReadOperation) executeOperation(conn net.Conn, storage StorageInterface) error {
 	log.Printf("Executing read operation\n")
 	value := storage.Read(rop.key)
-	conn.Write([]byte(value))
+	if len(value) == 0 {
+		return errors.New(KeyNotFound)
+	}
+
+	conn.Write([]byte(value + "\n"))
 
 	return nil
 }
@@ -131,6 +147,7 @@ func main() {
 func handleConnection(conn net.Conn, storage *Storage) {
 	log.Printf("Handling connection\n")
 	for {
+		log.Printf("DB = %+v\n", storage.db)
 		//defer conn.Close()
 		msg, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {

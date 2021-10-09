@@ -28,14 +28,39 @@ const (
 	OperationNotSupported = "Operation is not supported"
 )
 
-type Store struct {
-	db map[string]interface{}
+type StorageInterface interface {
+	Store(key string, value string)
+	Read(key string) string
+	Delete(key string)
+}
+
+type Storage struct {
+	db map[string]string
+}
+
+func (s *Storage) Store(key string, value string) {
+	s.db[key] = value
+}
+
+func (s *Storage) Read(key string) string {
+	return s.db[key]
+}
+
+func (s *Storage) Delete(key string) {
+	delete(s.db, key)
+}
+
+func NewStorage() *Storage {
+	db := make(map[string]string)
+	return &Storage{
+		db: db,
+	}
 }
 
 type Message struct {
 	op    string
 	key   string
-	value interface{}
+	value string
 }
 
 type Response struct {
@@ -44,12 +69,12 @@ type Response struct {
 }
 
 type Operation interface {
-	executeOperation() error
+	executeOperation(conn net.Conn, storage StorageInterface) error
 }
 
 type StoreOperation struct {
 	key   string
-	value interface{}
+	value string
 }
 
 type ReadOperation struct {
@@ -60,22 +85,31 @@ type DeleteOperation struct {
 	key string
 }
 
-func (sop StoreOperation) executeOperation() error {
+// we do use conn because we do not need send message to client
+func (sop StoreOperation) executeOperation(_ net.Conn, storage StorageInterface) error {
 	log.Printf("Executing store operation\n")
+	storage.Store(sop.key, sop.value)
 	return nil
 }
 
-func (dop DeleteOperation) executeOperation() error {
+// we do use conn because we do not need send message to client
+func (dop DeleteOperation) executeOperation(_ net.Conn, storage StorageInterface) error {
 	log.Printf("Executing delete operation\n")
+	storage.Delete(dop.key)
 	return nil
 }
 
-func (rop ReadOperation) executeOperation() error {
+// we write to conn the read result
+func (rop ReadOperation) executeOperation(conn net.Conn, storage StorageInterface) error {
 	log.Printf("Executing read operation\n")
+	value := storage.Read(rop.key)
+	conn.Write([]byte(value))
+
 	return nil
 }
 
 func main() {
+	storage := NewStorage()
 	socket, err := net.Listen("tcp", ADDRESS)
 	if err != nil {
 		log.Fatalf("ERR: Error opening tcp connection %v\n", err)
@@ -89,16 +123,15 @@ func main() {
 		}
 		log.Printf("New connection arrived\n")
 
-		go handleConnection(conn)
+		go handleConnection(conn, storage)
 	}
 }
 
 // handle the new connection
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, storage *Storage) {
 	log.Printf("Handling connection\n")
 	for {
 		//defer conn.Close()
-
 		msg, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			log.Printf("ERR: Error reading message from connection %v\n", err)
@@ -115,7 +148,7 @@ func handleConnection(conn net.Conn) {
 			conn.Write([]byte(err.Error() + "\n"))
 			continue
 		}
-		op.executeOperation()
+		op.executeOperation(conn, storage)
 	}
 }
 
@@ -154,7 +187,7 @@ func parseMessage(msg string) (*Message, error) {
 	}
 	key := keySplit[1]
 
-	var value interface{}
+	var value string
 	if op == OP_STORE {
 		if len(splited) < 3 {
 			log.Printf("Invalid syntax on value. You did not provide a value key-value pair\n")
@@ -170,6 +203,7 @@ func parseMessage(msg string) (*Message, error) {
 			log.Printf("Invalid syntax on key value.\n")
 			return nil, errors.New(InvalidSyntax)
 		}
+
 		value = valueSplit[1]
 	}
 

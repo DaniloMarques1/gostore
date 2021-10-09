@@ -22,7 +22,7 @@ const (
 
 // error messages
 const (
-	InvalidSyntax         = "Message is not valid. Invalid syntax"
+	InvalidSyntax = "Message is not valid. Invalid syntax"
 	// TODO better error report, it is not the key of the value it's the op, key, value
 	InvalidMessageKey     = "The key given is not valid"
 	OperationNotSupported = "Operation is not supported"
@@ -61,14 +61,17 @@ type DeleteOperation struct {
 }
 
 func (sop StoreOperation) executeOperation() error {
+	log.Printf("Executing store operation\n")
 	return nil
 }
 
 func (dop DeleteOperation) executeOperation() error {
+	log.Printf("Executing delete operation\n")
 	return nil
 }
 
 func (rop ReadOperation) executeOperation() error {
+	log.Printf("Executing read operation\n")
 	return nil
 }
 
@@ -104,11 +107,13 @@ func handleConnection(conn net.Conn) {
 
 		message, err := parseMessage(msg)
 		if err != nil {
-			//TODO
+			conn.Write([]byte(err.Error() + "\n"))
+			continue
 		}
 		op, err := getOperationFromMessage(message)
 		if err != nil {
-			// TODO handl err
+			conn.Write([]byte(err.Error() + "\n"))
+			continue
 		}
 		op.executeOperation()
 	}
@@ -119,7 +124,7 @@ func handleConnection(conn net.Conn) {
 func parseMessage(msg string) (*Message, error) {
 	msg = strings.Replace(msg, "\n", "", -1)
 	splited := strings.Split(msg, ";")
-		
+
 	if len(splited) < 2 {
 		log.Printf("Invalid syntax. Wrong number of ;\n")
 		return nil, errors.New(InvalidSyntax)
@@ -130,12 +135,21 @@ func parseMessage(msg string) (*Message, error) {
 		log.Printf("Invalid syntax on operation\n")
 		return nil, errors.New(InvalidSyntax)
 	}
+	if opSplit[0] != "op" {
+		log.Printf("Invalid syntax on operation key\n")
+		return nil, errors.New(InvalidMessageKey)
+	}
+
 	op := opSplit[1]
 
 	keySplit := strings.Split(splited[1], "=")
 	if len(keySplit) < 2 {
 		log.Printf("Invalid syntax on key\n")
 		return nil, errors.New(InvalidSyntax)
+	}
+	if keySplit[0] != "key" {
+		log.Printf("Invalid syntax on key key\n")
+		return nil, errors.New(InvalidMessageKey)
 	}
 	key := keySplit[1]
 
@@ -149,6 +163,10 @@ func parseMessage(msg string) (*Message, error) {
 		log.Printf("Value split = %v\n", valueSplit)
 		if len(valueSplit) < 2 {
 			log.Printf("Invalid syntax on value.\n")
+			return nil, errors.New(InvalidSyntax)
+		}
+		if valueSplit[0] != "value" {
+			log.Printf("Invalid syntax on key value.\n")
 			return nil, errors.New(InvalidSyntax)
 		}
 		value = valueSplit[1]
@@ -179,7 +197,7 @@ func getOperationFromMessage(message *Message) (Operation, error) {
 			key: message.key,
 		}
 	} else {
-		return nil, errors.New(OperationNotSupported) 
+		return nil, errors.New(OperationNotSupported)
 	}
 
 	return operation, nil

@@ -23,6 +23,8 @@ const (
 // error messages
 const (
 	InvalidSyntax         = "Message is not valid. Invalid syntax"
+	// TODO better error report, it is not the key of the value it's the op, key, value
+	InvalidMessageKey     = "The key given is not valid"
 	OperationNotSupported = "Operation is not supported"
 )
 

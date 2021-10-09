@@ -48,6 +48,13 @@ func TestParseMessageError5(t *testing.T) {
 	assertEqual(t, InvalidSyntax, err.Error())
 }
 
+func TestParseMessageError6(t *testing.T) {
+	msg := "opa=store;opa=name;opa=12"
+	_, err := parseMessage(msg)
+	assertNotNil(t, err)
+	assertEqual(t, InvalidMessageKey, err.Error())
+}
+
 func TestGetOpFromMessage(t *testing.T) {
 	msg := Message{
 		op:    OP_STORE,
@@ -62,7 +69,7 @@ func TestGetOpFromMessage(t *testing.T) {
 	assertEqual(t, opType.value, "Danilo")
 }
 
-func TestGetOpFromMessageError(t *testing.T) {
+func TestGetOpFromMessageError1(t *testing.T) {
 	msg := Message{
 		op:    "sum", // not supported op
 		key:   "name",
@@ -70,6 +77,16 @@ func TestGetOpFromMessageError(t *testing.T) {
 	}
 
 	_, err := getOperationFromMessage(&msg)
+	assertEqual(t, OperationNotSupported, err.Error())
+}
+
+func TestGetOpFromMessageError2(t *testing.T) {
+	msg := "op=sum;key=name;value=Danilo"
+	message, err := parseMessage(msg)
+	assertNil(t, err)
+
+	_, err = getOperationFromMessage(message)
+	assertNotNil(t, err)
 	assertEqual(t, OperationNotSupported, err.Error())
 }
 

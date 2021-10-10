@@ -18,3 +18,8 @@ store
 read
 delete
 ```
+
+## TODO
+
+* [ ] Create a example of usage
+* [ ] Create a "lib" that interact with the key-value server

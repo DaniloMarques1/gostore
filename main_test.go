@@ -13,6 +13,14 @@ func TestParseMessage(t *testing.T) {
 	assertEqual(t, message.op, "store")
 }
 
+func TestParseMessage2(t *testing.T) {
+	msg := "op=read;key=name"
+	message, err := parseMessage(msg)
+	assertNil(t, err)
+	assertEqual(t, message.op, "read")
+	assertEqual(t, message.key, "name")
+}
+
 func TestParseMessageError1(t *testing.T) {
 	msg := "op=store,key=value"
 	_, err := parseMessage(msg)
@@ -101,22 +109,11 @@ func TestStorageStore(t *testing.T) {
 	storage := NewStorage()
 	key := "name"
 	value := "Danilo"
-	err := storage.Store(key, value)
-	assertNil(t, err)
+	storage.Store(key, value)
 
 	assertEqual(t, storage.db[key], value)
 }
-func TestStorageStore1(t *testing.T) {
-	storage := NewStorage()
-	key := "name"
-	value := "Danilo"
-	err := storage.Store(key, value)
-	assertNil(t, err)
-	err = storage.Store(key, "Another value")
-	assertNotNil(t, err)
 
-	assertEqual(t, storage.db[key], value)
-}
 
 func TestStorageRead(t *testing.T) {
 	storage := NewStorage()

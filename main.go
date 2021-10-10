@@ -30,8 +30,14 @@ const (
 	DuplicationOfKey      = "The given key is already registered"
 )
 
+// Response Messages
+const (
+	StoredSuccessFully  = "Value stored successfully"
+	DeletedSuccessFully = "Value removed successfully"
+)
+
 type StorageInterface interface {
-	Store(key string, value string) error
+	Store(key string, value string)
 	Read(key string) string
 	Delete(key string)
 }
@@ -49,14 +55,8 @@ func NewStorage() *Storage {
 }
 
 // stores a value with the specified key inside the in memory db
-func (s *Storage) Store(key string, value string) error {
-	_, exists := s.db[key]
-	if exists {
-		return errors.New(DuplicationOfKey)
-	}
+func (s *Storage) Store(key string, value string) {
 	s.db[key] = value
-
-	return nil
 }
 
 // retrives a stored value
@@ -75,13 +75,8 @@ type Message struct {
 	value string
 }
 
-type Response struct {
-	code int
-	msg  string
-}
-
 type Operation interface {
-	executeOperation(conn net.Conn, storage StorageInterface) error
+	executeOperation(storage StorageInterface) (string, error)
 }
 
 type StoreOperation struct {
@@ -97,31 +92,41 @@ type DeleteOperation struct {
 	key string
 }
 
-// we do use conn because we do not need send message to client
-func (sop StoreOperation) executeOperation(_ net.Conn, storage StorageInterface) error {
+func (sop StoreOperation) executeOperation(storage StorageInterface) (string, error) {
 	log.Printf("Executing store operation\n")
+	log.Printf("KEY = %v - VALUE = %v\n", sop.key, sop.value)
+	value := storage.Read(sop.key)
+	if len(value) != 0 {
+		return "", errors.New(DuplicationOfKey)
+	}
+
 	storage.Store(sop.key, sop.value)
-	return nil
+	return StoredSuccessFully, nil
 }
 
 // we do use conn because we do not need send message to client
-func (dop DeleteOperation) executeOperation(_ net.Conn, storage StorageInterface) error {
+func (dop DeleteOperation) executeOperation(storage StorageInterface) (string, error) {
 	log.Printf("Executing delete operation\n")
+	log.Printf("KEY = %v\n", dop.key)
+	value := storage.Read(dop.key)
+	if len(value) == 0 {
+		return "", errors.New(KeyNotFound)
+	}
+
 	storage.Delete(dop.key)
-	return nil
+	return DeletedSuccessFully, nil
 }
 
 // we write to conn the read result
-func (rop ReadOperation) executeOperation(conn net.Conn, storage StorageInterface) error {
+func (rop ReadOperation) executeOperation(storage StorageInterface) (string, error) {
 	log.Printf("Executing read operation\n")
+	log.Printf("KEY = %v\n", rop.key)
 	value := storage.Read(rop.key)
 	if len(value) == 0 {
-		return errors.New(KeyNotFound)
+		return "", errors.New(KeyNotFound)
 	}
 
-	conn.Write([]byte(value + "\n"))
-
-	return nil
+	return value, nil
 }
 
 func main() {
@@ -165,7 +170,13 @@ func handleConnection(conn net.Conn, storage *Storage) {
 			conn.Write([]byte(err.Error() + "\n"))
 			continue
 		}
-		op.executeOperation(conn, storage)
+
+		response, err := op.executeOperation(storage)
+		if err != nil {
+			conn.Write([]byte(err.Error()+"\n"))
+			continue
+		}
+		conn.Write([]byte(response+"\n"))
 	}
 }
 

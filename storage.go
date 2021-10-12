@@ -1,31 +1,31 @@
 package main
 
 type Storage struct {
-	db map[string]string
+	db map[string]interface{}
 }
 
 type StorageInterface interface {
-	Store(key string, value string)
-	Read(key string) string
+	Store(key string, value interface{})
+	Read(key string) interface{}
 	Delete(key string)
-	List() []string
+	List() []interface{}
 }
 
 // returns a pointer to a new storage
 func NewStorage() *Storage {
-	db := make(map[string]string)
+	db := make(map[string]interface{})
 	return &Storage{
 		db: db,
 	}
 }
 
 // stores a value with the specified key inside the in memory db
-func (s *Storage) Store(key string, value string) {
+func (s *Storage) Store(key string, value interface{}) {
 	s.db[key] = value
 }
 
 // retrives a stored value
-func (s *Storage) Read(key string) string {
+func (s *Storage) Read(key string) interface{} {
 	return s.db[key]
 }
 
@@ -34,8 +34,8 @@ func (s *Storage) Delete(key string) {
 	delete(s.db, key)
 }
 
-func (s *Storage) List() []string {
-	resp := make([]string, 0, len(s.db))
+func (s *Storage) List() []interface{} {
+	resp := make([]interface{}, 0, len(s.db))
 	for _, v := range s.db {
 		resp = append(resp, v)
 	}

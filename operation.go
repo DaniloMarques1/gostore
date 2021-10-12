@@ -1,18 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 )
 
 type Operation interface {
-	executeOperation(storage StorageInterface) (string, error)
+	executeOperation(storage StorageInterface) (interface{}, error)
 }
 
 type StoreOperation struct {
 	key   string
-	value string
+	value interface{}
 }
 
 type ReadOperation struct {
@@ -25,11 +24,11 @@ type DeleteOperation struct {
 
 type ListOperation struct{}
 
-func (sop StoreOperation) executeOperation(storage StorageInterface) (string, error) {
+func (sop StoreOperation) executeOperation(storage StorageInterface) (interface{}, error) {
 	log.Printf("Executing store operation\n")
 	log.Printf("KEY = %v - VALUE = %v\n", sop.key, sop.value)
 	value := storage.Read(sop.key)
-	if len(value) != 0 {
+	if value != nil {
 		return "", errors.New(DuplicationOfKey)
 	}
 
@@ -38,11 +37,11 @@ func (sop StoreOperation) executeOperation(storage StorageInterface) (string, er
 }
 
 // we do use conn because we do not need send message to client
-func (dop DeleteOperation) executeOperation(storage StorageInterface) (string, error) {
+func (dop DeleteOperation) executeOperation(storage StorageInterface) (interface{}, error) {
 	log.Printf("Executing delete operation\n")
 	log.Printf("KEY = %v\n", dop.key)
 	value := storage.Read(dop.key)
-	if len(value) == 0 {
+	if value == nil {
 		return "", errors.New(KeyNotFound)
 	}
 
@@ -51,23 +50,18 @@ func (dop DeleteOperation) executeOperation(storage StorageInterface) (string, e
 }
 
 // we write to conn the read result
-func (rop ReadOperation) executeOperation(storage StorageInterface) (string, error) {
+func (rop ReadOperation) executeOperation(storage StorageInterface) (interface{}, error) {
 	log.Printf("Executing read operation\n")
 	log.Printf("KEY = %v\n", rop.key)
 	value := storage.Read(rop.key)
-	if len(value) == 0 {
+	if value == nil {
 		return "", errors.New(KeyNotFound)
 	}
 
 	return value, nil
 }
 
-func (lop ListOperation) executeOperation(storage StorageInterface) (string, error) {
+func (lop ListOperation) executeOperation(storage StorageInterface) (interface{}, error) {
 	resp := storage.List()
-	b, err := json.Marshal(resp)
-	if err != nil {
-		return "", err
-	}
-
-	return string(b), nil
+	return resp, nil
 }

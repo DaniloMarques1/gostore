@@ -41,15 +41,15 @@ const (
 type Message struct {
 	op    string
 	key   string
-	value string
+	value interface{}
 }
 
 type Response struct {
 	code    int
-	message string
+	message interface{}
 }
 
-func NewResponse(code int, message string) *Response {
+func NewResponse(code int, message interface{}) *Response {
 	return &Response{
 		code:    code,
 		message: message,
@@ -127,7 +127,7 @@ func parseMessage(msg string) (*Message, error) {
 		log.Printf("Invalid syntax on operation\n")
 		return nil, errors.New(InvalidSyntax)
 	}
-	if opSplit[0] !="op" || len(opSplit[1]) == 0 {
+	if opSplit[0] != "op" || len(opSplit[1]) == 0 {
 		log.Printf("Invalid syntax on operation key\n")
 		return nil, errors.New(InvalidMessageKey)
 	}

@@ -6,17 +6,19 @@ key and its value. We store the value as we receive the way we received it.
 Syntax the server is expecting is
 
 ```
-op=store;key=name;value=Danilo
+op=store;key=name;value=Danilo;
 op=read;key=name;
 op=delete;key=name;
+op=list;
 ```
 
-Our key-value store supports three operations (op)
+Our key-value store supports four operations (op)
 
 ```
 store
 read
 delete
+list
 ```
 
 ## TODO

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 )
@@ -21,6 +22,8 @@ type ReadOperation struct {
 type DeleteOperation struct {
 	key string
 }
+
+type ListOperation struct{}
 
 func (sop StoreOperation) executeOperation(storage StorageInterface) (string, error) {
 	log.Printf("Executing store operation\n")
@@ -59,3 +62,12 @@ func (rop ReadOperation) executeOperation(storage StorageInterface) (string, err
 	return value, nil
 }
 
+func (lop ListOperation) executeOperation(storage StorageInterface) (string, error) {
+	resp := storage.List()
+	b, err := json.Marshal(resp)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}

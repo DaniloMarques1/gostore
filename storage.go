@@ -8,8 +8,8 @@ type StorageInterface interface {
 	Store(key string, value string)
 	Read(key string) string
 	Delete(key string)
+	List() []string
 }
-
 
 // returns a pointer to a new storage
 func NewStorage() *Storage {
@@ -34,3 +34,11 @@ func (s *Storage) Delete(key string) {
 	delete(s.db, key)
 }
 
+func (s *Storage) List() []string {
+	resp := make([]string, 0, len(s.db))
+	for _, v := range s.db {
+		resp = append(resp, v)
+	}
+
+	return resp
+}

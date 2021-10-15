@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -37,41 +39,120 @@ func (c *Client) Connect() error {
 	return nil
 }
 
-func (c *Client) SendMessage(m *Message) ([]byte, error) {
-	bytes := m.parseMessage()
-	c.conn.Write(bytes)
-	response, err := bufio.NewReader(c.conn).ReadString('\n')
-	if err != nil {
-		log.Printf("Error reading message %v\n", err)
-		return []byte(""), err
-	}
-
-	return []byte(response), nil
+func (c *Client) Disconnect() error {
+	return c.conn.Close()
 }
 
-type Message struct {
-	op    string
+func (c *Client) sendMessage(op Operation) (*Response, error) {
+	bytes := op.parseOperation()
+	c.conn.Write(bytes)
+	responseString, err := bufio.NewReader(c.conn).ReadString('\n')
+	if err != nil {
+		log.Printf("Error reading message %v\n", err)
+		return nil, err
+	}
+	response := parseResponse(responseString)
+
+	return response, nil
+}
+
+type Operation interface {
+	parseOperation() []byte
+}
+
+type storeOperation struct {
 	key   string
 	value interface{}
 }
 
-func NewMessage(op, key, value string) *Message {
-	return &Message{
-		op:    op,
-		key:   key,
-		value: value,
-	}
+func (sop *storeOperation) parseOperation() []byte {
+	s := fmt.Sprintf("op=store;key=%v;value=%v;\n", sop.key, sop.value)
+
+	return []byte(s)
 }
 
-func (m *Message) parseMessage() []byte {
-	var b []byte
-	if m.op == OP_STORE {
-		b = []byte(fmt.Sprintf("op=%v;key=%v;value=%v\n",
-			m.op, m.key, m.value))
-	} else {
-		b = []byte(fmt.Sprintf("op=%v;key=%v\n",
-			m.op, m.key))
+func (c *Client) StoreOperation(key string, value interface{}) (*Response, error) {
+	op := storeOperation{key: key, value: value}
+	resp, err := c.sendMessage(&op)
+	if err != nil {
+		return nil, err
 	}
 
-	return b
+	return resp, nil
+}
+
+func (c *Client) ReadOperation(key string) (*Response, error) {
+	op := readOperation{key: key}
+	resp, err := c.sendMessage(&op)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type readOperation struct {
+	key string
+}
+
+func (rop *readOperation) parseOperation() []byte {
+	s := fmt.Sprintf("op=read;key=%v;\n", rop.key)
+
+	return []byte(s)
+}
+
+type deleteOperation struct {
+	key string
+}
+
+func (c *Client) DeleteOperation(key string) (*Response, error) {
+	op := deleteOperation{key: key}
+	resp, err := c.sendMessage(&op)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (dop *deleteOperation) parseOperation() []byte {
+	s := fmt.Sprintf("op=delete;key=%v;\n", dop.key)
+
+	return []byte(s)
+}
+
+type listOperation struct {
+}
+
+func (lop *listOperation) parseOperation() []byte {
+	return []byte("op=list;\n")
+}
+
+func (c *Client) ListOperation() (*Response, error) {
+	op := listOperation{}
+	resp, err := c.sendMessage(&op)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type Response struct {
+	Code    int
+	Message interface{}
+}
+
+func NewResponse(code int, message interface{}) *Response {
+	return &Response{Code: code, Message: message}
+}
+
+func parseResponse(responseStr string) *Response {
+	splited := strings.Split(responseStr, ";")
+	codeSplit := strings.Split(splited[0], "=")
+	code, _ := strconv.Atoi(codeSplit[1]) // TODO
+	msgSplit := strings.Split(splited[1], "=")
+	msg := msgSplit[1]
+
+	return NewResponse(code, msg)
 }

@@ -41,4 +41,3 @@ func TestStorageList(t *testing.T) {
 
 	assertEqual(t, 3, len(list))
 }
-

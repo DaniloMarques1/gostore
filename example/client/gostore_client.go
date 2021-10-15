@@ -56,6 +56,26 @@ func (c *Client) sendMessage(op Operation) (*Response, error) {
 	return response, nil
 }
 
+func (c *Client) StoreOperation(key string, value interface{}) (*Response, error) {
+	op := storeOperation{key: key, value: value}
+	return c.sendMessage(&op)
+}
+
+func (c *Client) ReadOperation(key string) (*Response, error) {
+	op := readOperation{key: key}
+	return c.sendMessage(&op)
+}
+
+func (c *Client) DeleteOperation(key string) (*Response, error) {
+	op := deleteOperation{key: key}
+	return c.sendMessage(&op)
+}
+
+func (c *Client) ListOperation() (*Response, error) {
+	op := listOperation{}
+	return c.sendMessage(&op)
+}
+
 type Operation interface {
 	parseOperation() []byte
 }
@@ -69,26 +89,6 @@ func (sop *storeOperation) parseOperation() []byte {
 	s := fmt.Sprintf("op=store;key=%v;value=%v;\n", sop.key, sop.value)
 
 	return []byte(s)
-}
-
-func (c *Client) StoreOperation(key string, value interface{}) (*Response, error) {
-	op := storeOperation{key: key, value: value}
-	resp, err := c.sendMessage(&op)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
-
-func (c *Client) ReadOperation(key string) (*Response, error) {
-	op := readOperation{key: key}
-	resp, err := c.sendMessage(&op)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }
 
 type readOperation struct {
@@ -105,16 +105,6 @@ type deleteOperation struct {
 	key string
 }
 
-func (c *Client) DeleteOperation(key string) (*Response, error) {
-	op := deleteOperation{key: key}
-	resp, err := c.sendMessage(&op)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
-}
-
 func (dop *deleteOperation) parseOperation() []byte {
 	s := fmt.Sprintf("op=delete;key=%v;\n", dop.key)
 
@@ -126,16 +116,6 @@ type listOperation struct {
 
 func (lop *listOperation) parseOperation() []byte {
 	return []byte("op=list;\n")
-}
-
-func (c *Client) ListOperation() (*Response, error) {
-	op := listOperation{}
-	resp, err := c.sendMessage(&op)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }
 
 type Response struct {

@@ -82,9 +82,9 @@ func main() {
 // handle the new connection
 func handleConnection(conn net.Conn, storage *Storage) {
 	log.Printf("Handling connection\n")
+	defer conn.Close()
 	for {
 		log.Printf("DB = %+v\n", storage.db)
-		//defer conn.Close()
 		msg, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			log.Printf("ERR: Error reading message from connection %v\n", err)

@@ -93,12 +93,14 @@ func handleConnection(conn net.Conn, storage *Storage) {
 
 		message, err := parseMessage(msg)
 		if err != nil {
-			conn.Write([]byte(err.Error() + "\n"))
+			response := NewResponse(1, err.Error())
+			conn.Write([]byte(response.parseResponse()))
 			continue
 		}
 		op, err := getOperationFromMessage(message)
 		if err != nil {
-			conn.Write([]byte(err.Error() + "\n"))
+			response := NewResponse(1, err.Error())
+			conn.Write([]byte(response.parseResponse()))
 			continue
 		}
 

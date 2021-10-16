@@ -70,7 +70,7 @@ func TestParseMessageError7(t *testing.T) {
 	assertEqual(t, InvalidMessageKey, err.Error())
 }
 
-func TestGetOpFromMessage(t *testing.T) {
+func TestGetOpFromMessage1(t *testing.T) {
 	msg := Message{
 		op:    OP_STORE,
 		key:   "name",
@@ -82,6 +82,44 @@ func TestGetOpFromMessage(t *testing.T) {
 	opType, ok := op.(StoreOperation) // get the concrete type
 	assertTrue(t, ok)
 	assertEqual(t, opType.value, "Danilo")
+}
+
+func TestGetOpFromMessage2(t *testing.T) {
+	msg := Message{
+		op:    OP_READ,
+		key:   "name",
+	}
+
+	op, err := getOperationFromMessage(&msg)
+	assertNil(t, err)
+	opType, ok := op.(ReadOperation) // get the concrete type
+	assertTrue(t, ok)
+	assertEqual(t, opType.key, "name")
+}
+
+func TestGetOpFromMessage3(t *testing.T) {
+	msg := Message{
+		op:    OP_DELETE,
+		key:   "name",
+	}
+
+	op, err := getOperationFromMessage(&msg)
+	assertNil(t, err)
+	opType, ok := op.(DeleteOperation) // get the concrete type
+	assertTrue(t, ok)
+	assertEqual(t, opType.key, "name")
+}
+
+func TestGetOpFromMessage4(t *testing.T) {
+	msg := Message{
+		op:    OP_LIST,
+		key:   "name",
+	}
+
+	op, err := getOperationFromMessage(&msg)
+	assertNil(t, err)
+	_, ok := op.(ListOperation) // get the concrete type
+	assertTrue(t, ok)
 }
 
 func TestGetOpFromMessageError1(t *testing.T) {

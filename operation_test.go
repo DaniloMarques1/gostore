@@ -60,5 +60,4 @@ func TestOperationList(t *testing.T) {
 
 	assertNil(t, err)
 	assertEqual(t, 3, len(list))
-	assertEqual(t, "Danilo", list[0])
 }

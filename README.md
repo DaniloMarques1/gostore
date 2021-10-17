@@ -39,17 +39,17 @@ Then all you need is to start send messages with the operations
 
 ```
 op=store;key=user;value={"user": "Danilo", "age": 22};
-code=0;message=Value stored successfully
+RESPONSE -> code=0;message=Value stored successfully
 
 op=read;key=user;
-code=0;message={"user": "Danilo", "age": 22}
+RESPONSE -> code=0;message={"user": "Danilo", "age": 22}
 
 op=list;
-code=0;message=[{"user": "Danilo", "age": 22}]
+RESPONSE -> code=0;message=[{"user": "Danilo", "age": 22}]
 
 op=keys;
-code=0;message=[user]
+RESPONSE -> code=0;message=[user]
 
 op=delete;key=user;
-code=0;message=Value removed successfully
+RESPONSE -> code=0;message=Value removed successfully
 ```

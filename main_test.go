@@ -86,8 +86,8 @@ func TestGetOpFromMessage1(t *testing.T) {
 
 func TestGetOpFromMessage2(t *testing.T) {
 	msg := Message{
-		op:    OP_READ,
-		key:   "name",
+		op:  OP_READ,
+		key: "name",
 	}
 
 	op, err := getOperationFromMessage(&msg)
@@ -99,8 +99,8 @@ func TestGetOpFromMessage2(t *testing.T) {
 
 func TestGetOpFromMessage3(t *testing.T) {
 	msg := Message{
-		op:    OP_DELETE,
-		key:   "name",
+		op:  OP_DELETE,
+		key: "name",
 	}
 
 	op, err := getOperationFromMessage(&msg)
@@ -112,8 +112,8 @@ func TestGetOpFromMessage3(t *testing.T) {
 
 func TestGetOpFromMessage4(t *testing.T) {
 	msg := Message{
-		op:    OP_LIST,
-		key:   "name",
+		op:  OP_LIST,
+		key: "name",
 	}
 
 	op, err := getOperationFromMessage(&msg)

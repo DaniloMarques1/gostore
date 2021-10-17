@@ -20,6 +20,7 @@ const (
 	OP_DELETE = "delete"
 	OP_READ   = "read"
 	OP_LIST   = "list"
+	OP_KEYS   = "keys"
 )
 
 // error messages
@@ -136,13 +137,13 @@ func parseMessage(msg string) (*Message, error) {
 
 	op := opSplit[1]
 
-	if op != OP_LIST && len(splited) < 2 {
+	if (op != OP_LIST && op != OP_KEYS) && len(splited) < 2 {
 		log.Printf("Invalid syntax. Wrong number of ;\n")
 		return nil, errors.New(InvalidSyntax)
 	}
 
 	var key string
-	if op != OP_LIST {
+	if op != OP_LIST && op != OP_KEYS {
 		keySplit := strings.Split(splited[1], "=")
 		if len(keySplit) < 2 {
 			log.Printf("Invalid syntax on key\n")
@@ -203,6 +204,8 @@ func getOperationFromMessage(m *Message) (Operation, error) {
 		}
 	} else if m.op == OP_LIST {
 		operation = ListOperation{}
+	} else if m.op == OP_KEYS {
+		operation = KeysOperation{}
 	} else {
 		return nil, errors.New(OperationNotSupported)
 	}

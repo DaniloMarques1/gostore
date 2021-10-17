@@ -9,6 +9,7 @@ type StorageInterface interface {
 	Read(key string) interface{}
 	Delete(key string)
 	List() []interface{}
+	Keys() []interface{}
 }
 
 // returns a pointer to a new storage
@@ -38,6 +39,15 @@ func (s *Storage) List() []interface{} {
 	resp := make([]interface{}, 0, len(s.db))
 	for _, v := range s.db {
 		resp = append(resp, v)
+	}
+
+	return resp
+}
+
+func (s *Storage) Keys() []interface{} {
+	resp := make([]interface{}, 0, len(s.db))
+	for key := range s.db {
+		resp = append(resp, key)
 	}
 
 	return resp

@@ -24,6 +24,8 @@ type DeleteOperation struct {
 
 type ListOperation struct{}
 
+type KeysOperation struct{}
+
 func (sop StoreOperation) executeOperation(storage StorageInterface) (interface{}, error) {
 	log.Printf("Executing store operation\n")
 	log.Printf("KEY = %v - VALUE = %v\n", sop.key, sop.value)
@@ -63,5 +65,10 @@ func (rop ReadOperation) executeOperation(storage StorageInterface) (interface{}
 
 func (lop ListOperation) executeOperation(storage StorageInterface) (interface{}, error) {
 	resp := storage.List()
+	return resp, nil
+}
+
+func (kop KeysOperation) executeOperation(storage StorageInterface) (interface{}, error) {
+	resp := storage.Keys()
 	return resp, nil
 }

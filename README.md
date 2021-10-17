@@ -21,7 +21,26 @@ delete
 list
 ```
 
-## TODO
+## How to use with telnet
 
-* [ ] Create an example of usage
-* [ ] Create a "lib" that interact with the key-value server
+Build and run the server by executing
+
+```
+go build . && ./gostore
+```
+
+After that, start a tcp connection
+
+```
+telnet localhost 5000
+```
+
+Then all you need is to start send messages with the operations
+
+```
+op=store;key=name;value={"name": "Danilo", "age": 22};
+op=read;key=name;
+op=list;
+op=keys;
+op=delete;key=name;
+```

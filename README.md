@@ -10,6 +10,7 @@ op=store;key=name;value=Danilo;
 op=read;key=name;
 op=delete;key=name;
 op=list;
+op=keys;
 ```
 
 Our key-value store supports four operations (op)
@@ -19,6 +20,7 @@ store
 read
 delete
 list
+keys
 ```
 
 ## How to use with telnet

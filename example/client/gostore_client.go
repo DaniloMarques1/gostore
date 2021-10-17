@@ -76,6 +76,11 @@ func (c *Client) ListOperation() (*Response, error) {
 	return c.sendMessage(&op)
 }
 
+func (c *Client) KeysOperation() (*Response, error) {
+	op := keysOperation{}
+	return c.sendMessage(&op)
+}
+
 type Operation interface {
 	parseOperation() []byte
 }
@@ -116,6 +121,13 @@ type listOperation struct {
 
 func (lop *listOperation) parseOperation() []byte {
 	return []byte("op=list;\n")
+}
+
+type keysOperation struct {
+}
+
+func (kop *keysOperation) parseOperation() []byte {
+	return []byte("op=keys;\n")
 }
 
 type Response struct {

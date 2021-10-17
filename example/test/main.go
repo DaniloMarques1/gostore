@@ -18,6 +18,7 @@ func main() {
 	storeOperation()
 	readOperation()
 	listOperation()
+	keysOperation()
 	deleteOperation()
 	listOperation()
 }
@@ -51,6 +52,15 @@ func readOperation() {
 
 func deleteOperation() {
 	response, err := c.DeleteOperation("name")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("%v\n", response)
+}
+
+func keysOperation() {
+	response, err := c.KeysOperation()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -56,26 +56,31 @@ func (c *Client) sendMessage(op Operation) (*Response, error) {
 	return response, nil
 }
 
+// perform the store operation
 func (c *Client) StoreOperation(key string, value interface{}) (*Response, error) {
 	op := storeOperation{key: key, value: value}
 	return c.sendMessage(&op)
 }
 
+// perform the read operation
 func (c *Client) ReadOperation(key string) (*Response, error) {
 	op := readOperation{key: key}
 	return c.sendMessage(&op)
 }
 
+// perform the delete operation
 func (c *Client) DeleteOperation(key string) (*Response, error) {
 	op := deleteOperation{key: key}
 	return c.sendMessage(&op)
 }
 
+// perform the list operation
 func (c *Client) ListOperation() (*Response, error) {
 	op := listOperation{}
 	return c.sendMessage(&op)
 }
 
+// perform the keys operation
 func (c *Client) KeysOperation() (*Response, error) {
 	op := keysOperation{}
 	return c.sendMessage(&op)

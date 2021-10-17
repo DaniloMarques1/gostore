@@ -38,9 +38,18 @@ telnet localhost 5000
 Then all you need is to start send messages with the operations
 
 ```
-op=store;key=name;value={"name": "Danilo", "age": 22};
-op=read;key=name;
+op=store;key=user;value={"user": "Danilo", "age": 22};
+code=0;message=Value stored successfully
+
+op=read;key=user;
+code=0;message={"user": "Danilo", "age": 22}
+
 op=list;
+code=0;message=[{"user": "Danilo", "age": 22}]
+
 op=keys;
-op=delete;key=name;
+code=0;message=[user]
+
+op=delete;key=user;
+code=0;message=Value removed successfully
 ```

@@ -14,7 +14,8 @@ const (
 )
 
 type Operation interface {
-	executeOperation(storage StorageInterface) (interface{}, error)
+	ExecuteOperation(storage StorageInterface) (interface{}, error)
+	GetOpType() string
 }
 
 type StoreOperation struct {
@@ -34,7 +35,7 @@ type ListOperation struct{}
 
 type KeysOperation struct{}
 
-func (sop StoreOperation) executeOperation(storage StorageInterface) (interface{}, error) {
+func (sop StoreOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	value := storage.Read(sop.key)
 	if value != nil {
 		return "", errors.New(DuplicationOfKey)
@@ -44,8 +45,12 @@ func (sop StoreOperation) executeOperation(storage StorageInterface) (interface{
 	return StoredSuccessFully, nil
 }
 
+func (sop StoreOperation) GetOpType() string {
+	return OP_STORE
+}
+
 // we do use conn because we do not need send message to client
-func (dop DeleteOperation) executeOperation(storage StorageInterface) (interface{}, error) {
+func (dop DeleteOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	value := storage.Read(dop.key)
 	if value == nil {
 		return "", errors.New(KeyNotFound)
@@ -55,8 +60,12 @@ func (dop DeleteOperation) executeOperation(storage StorageInterface) (interface
 	return DeletedSuccessFully, nil
 }
 
+func (sop DeleteOperation) GetOpType() string {
+	return OP_DELETE
+}
+
 // we write to conn the read result
-func (rop ReadOperation) executeOperation(storage StorageInterface) (interface{}, error) {
+func (rop ReadOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	value := storage.Read(rop.key)
 	if value == nil {
 		return "", errors.New(KeyNotFound)
@@ -65,12 +74,24 @@ func (rop ReadOperation) executeOperation(storage StorageInterface) (interface{}
 	return value, nil
 }
 
-func (lop ListOperation) executeOperation(storage StorageInterface) (interface{}, error) {
+func (sop ReadOperation) GetOpType() string {
+	return OP_READ
+}
+
+func (lop ListOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	resp := storage.List()
 	return resp, nil
 }
 
-func (kop KeysOperation) executeOperation(storage StorageInterface) (interface{}, error) {
+func (sop ListOperation) GetOpType() string {
+	return OP_LIST
+}
+
+func (kop KeysOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	resp := storage.Keys()
 	return resp, nil
+}
+
+func (sop KeysOperation) GetOpType() string {
+	return OP_KEYS
 }

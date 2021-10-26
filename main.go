@@ -2,10 +2,13 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"os"
 	"strings"
 )
 
@@ -55,6 +58,8 @@ func (r *Response) parseResponse() string {
 
 func main() {
 	storage := NewStorage()
+	SyncRead(&storage.db)
+
 	socket, err := net.Listen("tcp", ADDRESS)
 	if err != nil {
 		log.Fatalf("ERR: Error opening tcp connection %v\n", err)
@@ -97,11 +102,15 @@ func handleConnection(conn net.Conn, storage *Storage) {
 			continue
 		}
 
-		responseValue, err := op.executeOperation(storage)
+		responseValue, err := op.ExecuteOperation(storage)
 		if err != nil {
 			response := NewResponse(1, err.Error())
 			conn.Write([]byte(response.parseResponse()))
 			continue
+		}
+
+		if op.GetOpType() == OP_STORE || op.GetOpType() == OP_DELETE {
+			go SyncWrite(&storage.db)
 		}
 
 		response := NewResponse(0, responseValue)
@@ -203,4 +212,42 @@ func getOperationFromMessage(m *Message) (Operation, error) {
 	}
 
 	return operation, nil
+}
+
+func SyncRead(db *map[string]interface{}) {
+	file, err := os.OpenFile("db", os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		log.Fatal(err) // TODO better report
+	}
+	b, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err) // TODO
+	}
+	if len(b) > 0 {
+		err = json.Unmarshal(b, db)
+		if err != nil {
+			log.Fatal(err) // TODO
+		}
+	}
+
+	file.Close()
+}
+
+func SyncWrite(db *map[string]interface{}) {
+	file, err := os.OpenFile("db", os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err) // TODO better report
+	}
+	if len(*db) > 0 {
+		b, err := json.Marshal(db)
+		if err != nil {
+			log.Fatal(err) // TODO better report
+		}
+		_, err = file.Write(b)
+		if err != nil {
+			log.Fatal(err) // TODO
+		}
+	}
+
+	file.Close()
 }

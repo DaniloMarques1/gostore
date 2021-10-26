@@ -10,6 +10,7 @@ type StorageInterface interface {
 	Delete(key string)
 	List() []interface{}
 	Keys() []interface{}
+	//Push(key string, value interface{}) error TODO maybe later
 }
 
 // returns a pointer to a new storage

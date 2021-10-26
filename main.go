@@ -14,23 +14,15 @@ const (
 	ADDRESS = ":5000"
 )
 
-// operations supported
-const (
-	OP_STORE  = "store"
-	OP_DELETE = "delete"
-	OP_READ   = "read"
-	OP_LIST   = "list"
-	OP_KEYS   = "keys"
-)
-
 // error messages
 const (
 	InvalidSyntax = "Message is not valid. Invalid syntax"
 	// TODO better error report, it is not the key of the value it's the op, key, value
-	InvalidMessageKey     = "The given key is not valid"
-	OperationNotSupported = "Operation is not supported"
-	KeyNotFound           = "The given key was not found"
-	DuplicationOfKey      = "The given key is already registered"
+	InvalidMessageKey           = "The given key is not valid"
+	OperationNotSupported       = "Operation is not supported"
+	KeyNotFound                 = "The given key was not found"
+	DuplicationOfKey            = "The given key is already registered"
+	OperationOnTypeNotSupported = "The value type does not support this operation"
 )
 
 // Response Messages

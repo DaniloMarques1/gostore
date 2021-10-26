@@ -41,3 +41,13 @@ func TestStorageList(t *testing.T) {
 
 	assertEqual(t, 3, len(list))
 }
+
+func TestStorageKeys(t *testing.T) {
+	storage := NewStorage()
+	storage.Store("name", "Danilo")
+	storage.Store("id", 1)
+	storage.Store("age", 22)
+	list := storage.List()
+
+	assertEqual(t, 3, len(list))
+}

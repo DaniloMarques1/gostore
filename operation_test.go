@@ -61,3 +61,13 @@ func TestOperationList(t *testing.T) {
 	assertNil(t, err)
 	assertEqual(t, 3, len(list))
 }
+
+func TestOperationKeys(t *testing.T) {
+	storage := NewStorage()
+	storage.Store("name", "Danilo")
+	storage.Store("values", []int{1, 2, 3})
+	storage.Store("age", 22)
+
+	keys := storage.Keys()
+	assertEqual(t, 3, len(keys))
+}

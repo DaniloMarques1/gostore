@@ -4,6 +4,18 @@ import (
 	"testing"
 )
 
+func TestNewResponse(t *testing.T) {
+	response := NewResponse(0, StoredSuccessFully)
+	assertEqual(t, StoredSuccessFully, response.message)
+	assertEqual(t, 0, response.code)
+}
+
+func TestParseResponse(t *testing.T) {
+	response := NewResponse(0, StoredSuccessFully)
+	s := response.parseResponse()
+	assertEqual(t, "code=0;message=Value stored successfully\n", s)
+}
+
 func TestParseMessage(t *testing.T) {
 	msg := "op=store;key=name;value=Danilo"
 	message, err := parseMessage(msg)
@@ -119,6 +131,17 @@ func TestGetOpFromMessage4(t *testing.T) {
 	op, err := getOperationFromMessage(&msg)
 	assertNil(t, err)
 	_, ok := op.(ListOperation) // get the concrete type
+	assertTrue(t, ok)
+}
+
+func TestGetOpFromMessage5(t *testing.T) {
+	msg := Message{
+		op: OP_KEYS,
+	}
+
+	op, err := getOperationFromMessage(&msg)
+	assertNil(t, err)
+	_, ok := op.(KeysOperation) // get the concrete type
 	assertTrue(t, ok)
 }
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestOperationStore(t *testing.T) {
+func TestOperationStore1(t *testing.T) {
 	storage := NewStorage()
 	storeOp := StoreOperation{key: "name", value: "Danilo"}
 	resp, err := storeOp.executeOperation(storage)
@@ -12,6 +12,20 @@ func TestOperationStore(t *testing.T) {
 	assertNil(t, err)
 	assertEqual(t, "Danilo", storage.Read("name"))
 	assertEqual(t, StoredSuccessFully, resp)
+}
+
+func TestOperationStore2(t *testing.T) {
+	storage := NewStorage()
+	storeOp := StoreOperation{key: "name", value: "Danilo"}
+	resp, err := storeOp.executeOperation(storage)
+
+	assertNil(t, err)
+	assertEqual(t, "Danilo", storage.Read("name"))
+	assertEqual(t, StoredSuccessFully, resp)
+
+	storeOp = StoreOperation{key: "name", value: "Messi"}
+	_, err = storeOp.executeOperation(storage)
+	assertNotNil(t, err)
 }
 
 func TestOperationRead1(t *testing.T) {
@@ -37,7 +51,14 @@ func TestOperationRead2(t *testing.T) {
 	assertEqual(t, 3, len(list))
 }
 
-func TestOperationDelete(t *testing.T) {
+func TestOperationRead3(t *testing.T) {
+	storage := NewStorage()
+	readOp := ReadOperation{key: "values"}
+	_, err := readOp.executeOperation(storage)
+	assertNotNil(t, err)
+}
+
+func TestOperationDelete1(t *testing.T) {
 	storage := NewStorage()
 	storage.Store("name", "Danilo")
 	deleteOp := DeleteOperation{key: "name"}
@@ -45,6 +66,14 @@ func TestOperationDelete(t *testing.T) {
 
 	assertNil(t, err)
 	assertEqual(t, DeletedSuccessFully, resp)
+}
+
+func TestOperationDelete2(t *testing.T) {
+	storage := NewStorage()
+	deleteOp := DeleteOperation{key: "name"}
+	_, err := deleteOp.executeOperation(storage)
+	assertNotNil(t, err)
+
 }
 
 func TestOperationList(t *testing.T) {
@@ -68,6 +97,10 @@ func TestOperationKeys(t *testing.T) {
 	storage.Store("values", []int{1, 2, 3})
 	storage.Store("age", 22)
 
-	keys := storage.Keys()
+	keysOp := KeysOperation{}
+	resp, err := keysOp.executeOperation(storage)
+	keys := resp.([]interface{})
+
+	assertNil(t, err)
 	assertEqual(t, 3, len(keys))
 }

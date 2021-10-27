@@ -18,13 +18,14 @@ export default class Client {
 
   async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      try {
-        this.client.connect({host: this.host, port: this.port}, () => {
-          resolve();
-        });
-      } catch (err) {
+      this.client.connect({ host: this.host, port: this.port }, () => {
+        resolve();
+      });
+
+      // if connect fail, will emmit a error event
+      this.client.on('error', (err) => {
         reject(err);
-      }
+      });
     });
   }
 

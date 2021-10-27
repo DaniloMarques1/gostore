@@ -1,0 +1,17 @@
+{
+  "name": "ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "client.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^16.11.1"
+  },
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "com": "tsc && node ./build/client.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

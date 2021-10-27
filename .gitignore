@@ -1,0 +1,4 @@
+db
+gostore
+**/node_modules/
+**/build/

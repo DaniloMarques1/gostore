@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -13,6 +14,8 @@ const (
 	OP_STORE  = "store"
 	OP_READ   = "read"
 	OP_DELETE = "delete"
+	OP_LIST   = "list"
+	OP_KEYS   = "keys"
 )
 
 type Client struct {
@@ -32,7 +35,6 @@ func (c *Client) Connect() error {
 	var err error
 	c.conn, err = net.Dial("tcp", fmt.Sprintf("%v:%v", c.Host, c.Port))
 	if err != nil {
-		log.Printf("Error reading message %v\n", err)
 		return err
 	}
 
@@ -45,6 +47,7 @@ func (c *Client) Disconnect() error {
 
 func (c *Client) sendMessage(op Operation) (*Response, error) {
 	bytes := op.parseOperation()
+	fmt.Println(string(bytes))
 	c.conn.Write(bytes)
 	responseString, err := bufio.NewReader(c.conn).ReadString('\n')
 	if err != nil {
@@ -58,7 +61,15 @@ func (c *Client) sendMessage(op Operation) (*Response, error) {
 
 // perform the store operation
 func (c *Client) StoreOperation(key string, value interface{}) (*Response, error) {
-	op := storeOperation{key: key, value: value}
+	concrete, ok := value.(string)
+	if !ok {
+		b, err := json.Marshal(value)
+		if err != nil {
+			return nil, err
+		}
+		concrete = string(b)
+	}
+	op := storeOperation{key: key, value: concrete}
 	return c.sendMessage(&op)
 }
 
@@ -96,7 +107,7 @@ type storeOperation struct {
 }
 
 func (sop *storeOperation) parseOperation() []byte {
-	s := fmt.Sprintf("op=store;key=%v;value=%v;\n", sop.key, sop.value)
+	s := fmt.Sprintf("op=%v;key=%v;value=%v;\n", OP_STORE, sop.key, sop.value)
 
 	return []byte(s)
 }
@@ -106,7 +117,7 @@ type readOperation struct {
 }
 
 func (rop *readOperation) parseOperation() []byte {
-	s := fmt.Sprintf("op=read;key=%v;\n", rop.key)
+	s := fmt.Sprintf("op=%v;key=%v;\n", OP_READ, rop.key)
 
 	return []byte(s)
 }
@@ -116,7 +127,7 @@ type deleteOperation struct {
 }
 
 func (dop *deleteOperation) parseOperation() []byte {
-	s := fmt.Sprintf("op=delete;key=%v;\n", dop.key)
+	s := fmt.Sprintf("op=%v;key=%v;\n", OP_DELETE, dop.key)
 
 	return []byte(s)
 }
@@ -125,14 +136,14 @@ type listOperation struct {
 }
 
 func (lop *listOperation) parseOperation() []byte {
-	return []byte("op=list;\n")
+	return []byte(fmt.Sprintf("op=%v;\n", OP_LIST))
 }
 
 type keysOperation struct {
 }
 
 func (kop *keysOperation) parseOperation() []byte {
-	return []byte("op=keys;\n")
+	return []byte(fmt.Sprintf("op=%v;\n", OP_KEYS))
 }
 
 type Response struct {
@@ -145,6 +156,7 @@ func NewResponse(code int, message interface{}) *Response {
 }
 
 func parseResponse(responseStr string) *Response {
+	responseStr = strings.Replace(responseStr, "\n", "", -1)
 	splited := strings.Split(responseStr, ";")
 	codeSplit := strings.Split(splited[0], "=")
 	code, _ := strconv.Atoi(codeSplit[1]) // TODO

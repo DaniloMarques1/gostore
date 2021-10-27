@@ -13,7 +13,7 @@ op=list;
 op=keys;
 ```
 
-Our key-value store supports four operations (op)
+Our key-value store supports five operations (op)
 
 ```
 store

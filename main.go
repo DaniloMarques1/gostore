@@ -234,19 +234,18 @@ func SyncRead(db *map[string]interface{}) {
 }
 
 func SyncWrite(db *map[string]interface{}) {
-	file, err := os.OpenFile("db", os.O_WRONLY, 0666)
+	file, err := os.OpenFile("db", os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		log.Fatal(err) // TODO better report
 	}
-	if len(*db) > 0 {
-		b, err := json.Marshal(db)
-		if err != nil {
-			log.Fatal(err) // TODO better report
-		}
-		_, err = file.Write(b)
-		if err != nil {
-			log.Fatal(err) // TODO
-		}
+	b, err := json.Marshal(db)
+	if err != nil {
+		log.Fatal(err) // TODO better report
+	}
+
+	_, err = file.Write(b)
+	if err != nil {
+		log.Fatal(err) // TODO
 	}
 
 	file.Close()

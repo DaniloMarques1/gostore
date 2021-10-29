@@ -43,7 +43,7 @@ class StoreOperation:
         self.value = value
 
     def parse_operation(self):
-        if type(self.value) == list or type(self.value) == dict:
+        if type(self.value) == list or type(self.value) == dict or type(self.value) == tuple:
             self.value = json.dumps(self.value)
         return bytes(f'op=store;key={self.key};value={self.value};\n', 'utf-8')
 

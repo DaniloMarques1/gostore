@@ -31,11 +31,11 @@ class ReadOperation:
 
 class ListOperation:
     def parse_operation(self):
-        return bytes(f'op=list;\n', 'utf-8')
+        return bytes('op=list;\n', 'utf-8')
 
 class KeysOperation:
     def parse_operation(self):
-        return bytes(f'op=keys;\n', 'utf-8')
+        return bytes('op=keys;\n', 'utf-8')
 
 class StoreOperation:
     def __init__(self, key, value):

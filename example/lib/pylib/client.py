@@ -40,11 +40,11 @@ class KeysOperation:
 class StoreOperation:
     def __init__(self, key, value):
         self.key = key
+        if type(value) == list or type(value) == dict or type(value) == tuple:
+            value = json.dumps(value)
         self.value = value
 
     def parse_operation(self):
-        if type(self.value) == list or type(self.value) == dict or type(self.value) == tuple:
-            self.value = json.dumps(self.value)
         return bytes(f'op=store;key={self.key};value={self.value};\n', 'utf-8')
 
 class DeleteOperation:

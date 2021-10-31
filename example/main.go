@@ -37,30 +37,8 @@ func readOperation() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	log.Printf("%v\n", response)
-	/*
-	str, ok := response.Message.(string)
-	if !ok {
-		log.Fatal("Error parsing response")
-	}
-	arr := make([]int, 0, 0)
-	if err := json.Unmarshal([]byte(str), &arr); err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%T\n", arr)
-	log.Printf("%v\n", arr)
-
-	log.Printf("Response = %v\n", response.Message)
-	log.Printf("Response = %T\n", response.Message)
-	numbers := make([]int, 0, 3)
-
-	err = json.Unmarshal([]byte(str), &numbers)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Numbers %v\n", numbers)
-	log.Printf("Numbers %T\n", numbers)
-	*/
 }
 
 func listOperation() {

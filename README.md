@@ -55,3 +55,9 @@ RESPONSE -> code=0;message=[user]
 op=delete;key=user;
 RESPONSE -> code=0;message=Value removed successfully
 ```
+
+### Examples
+
+In the examples folder, you can find three "libs" that implement a communication
+with the server. They are implemented using go, typescript and python. Along
+with the libs, there is also a main file showing how to use the lib.

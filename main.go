@@ -28,12 +28,6 @@ const (
 	OperationOnTypeNotSupported = "The value type does not support this operation"
 )
 
-// Response Messages
-const (
-	StoredSuccessFully  = "Value stored successfully"
-	DeletedSuccessFully = "Value removed successfully"
-)
-
 type Message struct {
 	op    string
 	key   string
@@ -109,7 +103,7 @@ func handleConnection(conn net.Conn, storage *Storage) {
 			continue
 		}
 
-		if op.GetOpType() == OP_STORE || op.GetOpType() == OP_DELETE {
+		if op.GetOpType() == OP_STORE || op.GetOpType() == OP_DELETE || op.GetOpType() == OP_REPLACE {
 			go SyncWrite(&storage.db)
 		}
 
@@ -159,7 +153,7 @@ func parseMessage(msg string) (*Message, error) {
 	}
 
 	var value string
-	if op == OP_STORE {
+	if op == OP_STORE || op == OP_REPLACE {
 		if len(splited) < 3 {
 			log.Printf("Invalid syntax on value. You did not provide a value for the key-value pair\n")
 			return nil, errors.New(InvalidSyntax)
@@ -190,24 +184,20 @@ func parseMessage(msg string) (*Message, error) {
 func getOperationFromMessage(m *Message) (Operation, error) {
 	log.Printf("IN getOperationFromMessage %+v\n", m)
 	var operation Operation
-	if m.op == OP_STORE {
-		operation = StoreOperation{
-			key:   m.key,
-			value: m.value,
-		}
-	} else if m.op == OP_DELETE {
-		operation = DeleteOperation{
-			key: m.key,
-		}
-	} else if m.op == OP_READ {
-		operation = ReadOperation{
-			key: m.key,
-		}
-	} else if m.op == OP_LIST {
+	switch m.op {
+	case OP_STORE:
+		operation = StoreOperation{key: m.key, value: m.value}
+	case OP_DELETE:
+		operation = DeleteOperation{key: m.key}
+	case OP_READ:
+		operation = ReadOperation{key: m.key}
+	case OP_LIST:
 		operation = ListOperation{}
-	} else if m.op == OP_KEYS {
+	case OP_KEYS:
 		operation = KeysOperation{}
-	} else {
+	case OP_REPLACE:
+		operation = ReplaceOperation{key: m.key, value: m.value}
+	default:
 		return nil, errors.New(OperationNotSupported)
 	}
 

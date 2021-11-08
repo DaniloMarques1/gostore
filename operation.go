@@ -6,11 +6,19 @@ import (
 
 // operations supported
 const (
-	OP_STORE  = "store"
-	OP_DELETE = "delete"
-	OP_READ   = "read"
-	OP_LIST   = "list"
-	OP_KEYS   = "keys"
+	OP_STORE   = "store"
+	OP_DELETE  = "delete"
+	OP_READ    = "read"
+	OP_LIST    = "list"
+	OP_KEYS    = "keys"
+	OP_REPLACE = "replace"
+)
+
+// Operation Response Messages
+const (
+	StoredSuccessFully   = "Value stored successfully"
+	DeletedSuccessFully  = "Value removed successfully"
+	ReplacedSuccessFully = "Value replaced successfully"
 )
 
 type Operation interface {
@@ -34,6 +42,11 @@ type DeleteOperation struct {
 type ListOperation struct{}
 
 type KeysOperation struct{}
+
+type ReplaceOperation struct {
+	key   string
+	value interface{}
+}
 
 func (sop StoreOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	value := storage.Read(sop.key)
@@ -94,4 +107,17 @@ func (kop KeysOperation) ExecuteOperation(storage StorageInterface) (interface{}
 
 func (sop KeysOperation) GetOpType() string {
 	return OP_KEYS
+}
+
+func (rop ReplaceOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
+	value := storage.Read(rop.key)
+	if value == nil {
+		return nil, errors.New(KeyNotFound)
+	}
+	storage.Store(rop.key, rop.value)
+	return ReplacedSuccessFully, nil
+}
+
+func (rop ReplaceOperation) GetOpType() string {
+	return OP_REPLACE
 }

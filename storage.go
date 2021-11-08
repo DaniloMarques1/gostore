@@ -10,6 +10,7 @@ type StorageInterface interface {
 	Delete(key string)
 	List() []interface{}
 	Keys() []interface{}
+	Replace(key string, value interface{})
 	//Push(key string, value interface{}) error TODO maybe later
 }
 
@@ -52,4 +53,8 @@ func (s *Storage) Keys() []interface{} {
 	}
 
 	return resp
+}
+
+func (s *Storage) Replace(key string, value interface{}) {
+	s.db[key] = value
 }

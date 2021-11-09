@@ -11,9 +11,10 @@ op=read;key=name;
 op=delete;key=name;
 op=list;
 op=keys;
+op=replace;key=name;value=Fitz;
 ```
 
-Our key-value store supports five operations (op)
+Our key-value store supports six operations (op)
 
 ```
 store
@@ -21,6 +22,7 @@ read
 delete
 list
 keys
+replace
 ```
 
 ## How to use with telnet
@@ -54,6 +56,9 @@ RESPONSE -> code=0;message=[user]
 
 op=delete;key=user;
 RESPONSE -> code=0;message=Value removed successfully
+
+op=replaced;key=user;value={"user": "Fitz", "age": 19};
+RESPONSE -> code=0;message=Value replaced successfully
 ```
 
 ### Examples

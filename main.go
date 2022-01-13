@@ -204,8 +204,24 @@ func getOperationFromMessage(m *Message) (Operation, error) {
 	return operation, nil
 }
 
+// will return the db file full path
+// that should be located where the
+// gostore is installed
+func getDbFileName() (string, error) {
+	path, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return path + ".db", nil
+}
+
 func SyncRead(db *map[string]interface{}) {
-	file, err := os.OpenFile("db", os.O_CREATE|os.O_RDWR, 0666)
+	fileName, err := getDbFileName()
+	if err != nil {
+		log.Fatal(err) // TODO better report
+	}
+
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		log.Fatal(err) // TODO better report
 	}
@@ -224,7 +240,12 @@ func SyncRead(db *map[string]interface{}) {
 }
 
 func SyncWrite(db *map[string]interface{}) {
-	file, err := os.OpenFile("db", os.O_WRONLY|os.O_TRUNC, 0666)
+	fileName, err := getDbFileName()
+	if err != nil {
+		log.Fatal(err) // TODO better report
+	}
+
+	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		log.Fatal(err) // TODO better report
 	}

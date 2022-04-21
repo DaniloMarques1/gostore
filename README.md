@@ -30,7 +30,9 @@ replace
 Build and run the server by executing
 
 ```
-go build . && ./gostore
+go build . 
+./gostore # default to port 5000 or
+./gostore --port 8080
 ```
 
 After that, start a tcp connection

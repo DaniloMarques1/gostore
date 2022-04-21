@@ -49,7 +49,7 @@ type ReplaceOperation struct {
 }
 
 func (sop StoreOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
-	value := storage.Read(sop.key)
+	value, _ := storage.Read(sop.key) // ignoring error becase we care only if key the exists
 	if value != nil {
 		return "", errors.New(DuplicationOfKey)
 	}
@@ -64,12 +64,15 @@ func (sop StoreOperation) GetOpType() string {
 
 // we do use conn because we do not need send message to client
 func (dop DeleteOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
-	value := storage.Read(dop.key)
-	if value == nil {
-		return "", errors.New(KeyNotFound)
+	_, err := storage.Read(dop.key)
+	if err != nil {
+		return nil, err
 	}
 
-	storage.Delete(dop.key)
+	err = storage.Delete(dop.key)
+	if err != nil {
+		return nil, err
+	}
 	return DeletedSuccessFully, nil
 }
 
@@ -79,9 +82,9 @@ func (sop DeleteOperation) GetOpType() string {
 
 // we write to conn the read result
 func (rop ReadOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
-	value := storage.Read(rop.key)
-	if value == nil {
-		return "", errors.New(KeyNotFound)
+	value, err := storage.Read(rop.key)
+	if err != nil {
+		return "", err
 	}
 
 	return value, nil
@@ -92,7 +95,10 @@ func (sop ReadOperation) GetOpType() string {
 }
 
 func (lop ListOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
-	resp := storage.List()
+	resp, err := storage.List()
+	if err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -101,7 +107,10 @@ func (sop ListOperation) GetOpType() string {
 }
 
 func (kop KeysOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
-	resp := storage.Keys()
+	resp, err := storage.Keys()
+	if err != nil {
+		return nil, err
+	}
 	return resp, nil
 }
 
@@ -110,9 +119,9 @@ func (sop KeysOperation) GetOpType() string {
 }
 
 func (rop ReplaceOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
-	value := storage.Read(rop.key)
-	if value == nil {
-		return nil, errors.New(KeyNotFound)
+	_, err := storage.Read(rop.key)
+	if err != nil {
+		return nil, err
 	}
 	storage.Store(rop.key, rop.value)
 	return ReplacedSuccessFully, nil

@@ -39,7 +39,7 @@ After that, start a tcp connection
 telnet localhost 5000
 ```
 
-Then all you need is to start send messages with the operations
+Then all you need to do is to start send messages with the operations
 
 ```
 op=store;key=user;value={"user": "Danilo", "age": 22};

@@ -1,4 +1,4 @@
-package main
+package server
 
 type Storage struct {
 	db map[string]interface{}

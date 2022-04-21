@@ -37,7 +37,7 @@ func NewServer(port string) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	storage := NewStorage()
+	storage, _ := NewStorage() // TODO
 	return &Server{listener: listener, port: port, storage: storage}, nil
 }
 

@@ -62,7 +62,6 @@ func (sop StoreOperation) GetOpType() string {
 	return OP_STORE
 }
 
-// we do use conn because we do not need send message to client
 func (dop DeleteOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	_, err := storage.Read(dop.key)
 	if err != nil {
@@ -80,7 +79,6 @@ func (sop DeleteOperation) GetOpType() string {
 	return OP_DELETE
 }
 
-// we write to conn the read result
 func (rop ReadOperation) ExecuteOperation(storage StorageInterface) (interface{}, error) {
 	value, err := storage.Read(rop.key)
 	if err != nil {

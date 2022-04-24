@@ -48,18 +48,16 @@ func (s *Server) Start() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("New connection\n")
 		go s.handleConnection(conn) // TODO add clover db
 	}
 }
 
 func (s *Server) handleConnection(conn net.Conn) {
-	log.Printf("Handling connection: %v\n", conn.RemoteAddr().String())
 	defer conn.Close()
 	for {
 		msg, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
-			log.Printf("ERR: Error reading message from connection %v\n", err)
+			log.Printf("Connection lostt: %v\n", err)
 			return
 		}
 
@@ -86,7 +84,6 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 // parseMessage convert the received string into a Message
 func (s *Server) parseMessage(msg string) (*Message, error) {
-	log.Printf("parseMessage %+v\n", msg)
 	msg = strings.Replace(msg, "\n", "", -1)
 	msg = strings.Replace(msg, "\r", "", -1)
 	splited := strings.Split(msg, ";")
@@ -130,7 +127,6 @@ func (s *Server) parseMessage(msg string) (*Message, error) {
 			return nil, errors.New(InvalidSyntax)
 		}
 		valueSplit := strings.Split(splited[2], "=")
-		log.Printf("Value split = %v\n", valueSplit)
 		if len(valueSplit) < 2 {
 			log.Printf("Invalid syntax on value.\n")
 			return nil, errors.New(InvalidSyntax)
@@ -154,7 +150,6 @@ func (s *Server) parseMessage(msg string) (*Message, error) {
 // return the Operation that will be executed
 // based on the received message
 func (s *Server) getOperationFromMessage(m *Message) (Operation, error) {
-	log.Printf("IN getOperationFromMessage %+v\n", m)
 	var operation Operation
 	switch m.op {
 	case OP_STORE:

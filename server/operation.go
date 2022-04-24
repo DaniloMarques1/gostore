@@ -121,7 +121,7 @@ func (rop ReplaceOperation) ExecuteOperation(storage StorageInterface) (interfac
 	if err != nil {
 		return nil, err
 	}
-	storage.Store(rop.key, rop.value)
+	storage.Replace(rop.key, rop.value)
 	return ReplacedSuccessFully, nil
 }
 
